@@ -5,11 +5,12 @@ import java.sql.*;
 public class Connector {
 	public Connection con;
 	public Statement stmt;
+	
 	public Connector() throws Exception {
 		try{
-		 	String userName = "cs5530";
-	   		String password = "soc5530@16";
-	        	String url = "jdbc:mysql://georgia.eng.utah.edu/cs5530db";
+		 	String userName = "cs5530u18";
+	   		String password = "3s375pkk";
+	        	String url = "jdbc:mysql://georgia.eng.utah.edu/cs5530db18";
 		        Class.forName ("com.mysql.jdbc.Driver").newInstance ();
         		con = DriverManager.getConnection (url, userName, password);
 

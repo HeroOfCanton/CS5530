@@ -6,11 +6,11 @@ import java.sql.*;
 public class Order{
 	public Order() {
 	}
-	public String getOrders(String attrName, String attrValue, Statement stmt) throws Exception{
+	public String getUsers(String attrName, String attrValue, Statement stmt) throws Exception{
 		String query;
 		String resultstr="";
 		ResultSet results; 
-		query="Select * from orders where "+attrName+"='"+attrValue+"'";
+		query="Select * from Users where "+attrName+"='"+attrValue+"'";
 		try{
 			results = stmt.executeQuery(query);
         } catch(Exception e) {
@@ -18,10 +18,9 @@ public class Order{
 	                System.err.println(e.getMessage());
 			throw(e);
 		}
-		System.out.println("Order:getOrders query="+query+"\n");
+		System.out.println("Users:getUsers query="+query+"\n");
 		while (results.next()){
-			resultstr += "<b>"+results.getString("login")+"</b> purchased "+results.getInt("quantity") +
-							" copies of &nbsp'<i>"+results.getString("title")+"'</i><BR>\n";	
+			resultstr += "<b>"+results.getString("login")+"</b> realname "+results.getString("name");	
 		}
 		return resultstr;
 	}

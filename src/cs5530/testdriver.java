@@ -13,7 +13,7 @@ public class testdriver {
 			Connector con= new Connector();
 			Order order= new Order();
 			
-			String result=order.getOrders("login", "user1", con.stmt);
+			String result=order.getUsers("login", "rwelling", con.stmt);
 			System.out.println(result);
 			con.closeConnection();
 		}
