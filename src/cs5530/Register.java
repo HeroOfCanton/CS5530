@@ -14,11 +14,11 @@ public class Register {
 							 String _telephone, 
 							 Statement stmt) {
 		
-		String sql="SELECT login, password FROM Users "
-				+  "WHERE login ='" +_login +"'";
+		String sql="INSERT INTO Users (login, name, password, city, state, telephone, type) "
+				+  "VALUES ('" +_login +"','" +_realName +"','" +_password1 +"','" +_city + "','" +_state +"','" +_telephone +"','user');";
 		
 		int rs = 0;
-//		System.out.println("executing "+ sql);
+		//System.out.println("executing "+ sql);
 	 	try {
 	 		rs = stmt.executeUpdate(sql);
 	 		
@@ -31,7 +31,10 @@ public class Register {
 	 		}
 	 	}
 	 	catch(Exception e) {
-	 		System.out.println("Database error. Please contact System Administrator");
+	 		if(e.getMessage().equals("Duplicate entry '"+_login+"' for key 'PRIMARY'"))
+	 		{
+	 			System.out.println("Duplicate login name detected");
+	 		}
 	 	}
 		return "fail";
 	}
