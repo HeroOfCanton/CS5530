@@ -25,14 +25,12 @@ public class Register {
 	 		if(rs > 0) {
 	 			return "success";
 	 		}
-	 		
 	 		else {
 	 			return "fail";
 	 		}
 	 	}
 	 	catch(Exception e) {
-	 		if(e.getMessage().equals("Duplicate entry '"+_login+"' for key 'PRIMARY'"))
-	 		{
+	 		if(e.getMessage().equals("Duplicate entry '"+_login+"' for key 'PRIMARY'")) {
 	 			System.out.println("Duplicate login name detected");
 	 		}
 	 	}

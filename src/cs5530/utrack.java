@@ -1,7 +1,5 @@
 package cs5530;
 
-import java.lang.*;
-import java.sql.*;
 import java.io.*;
 
 public class utrack {
@@ -61,7 +59,7 @@ public class utrack {
 		}
 	}
 	
-	public static void adminMenu() throws Exception {
+	public static void adminMenu(Connector con) throws Exception {
 		int c;
 		String choice;
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
@@ -84,13 +82,13 @@ public class utrack {
 	 	 	
 	 	 	switch(c) {
 	 	 	case(1):
-	 	 		newPOI();
+	 	 		newPOI(con);
 	 	 		break;
 	 	 	case(2):
-	 	 		modPOI();
+	 	 		modPOI(con);
 	 	 		break;
 	 	 	case(3):
-	 	 		awards();
+	 	 		awards(con);
 	 	 		break;
 	 	 	case(4):
 	 	 	default:
@@ -99,19 +97,125 @@ public class utrack {
 		}
 	}
 	
-	public static void newPOI() {
+	public static void newPOI(Connector con) throws Exception {
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+		
+		String name, city, state, url, telephone, yearest, hours, price, category;
+		while(true) {
+			System.out.println("	Add New POI	");
+			System.out.println("Enter POI Name:");
+			while ((name = in.readLine()) == null && name.length() == 0);
+			System.out.println("Enter POI City:");
+			while ((city = in.readLine()) == null && city.length() == 0);			
+			System.out.println("Enter POI state as a 2-letter abreviation eg. UT:");
+			while ((state = in.readLine()) == null && state.length() == 0);			
+			System.out.println("Enter POI URL eg. www.somedomain.com:");
+			while ((url = in.readLine()) == null && url.length() == 0);			
+			System.out.println("Enter POI telephone with no spaces, or characters eg. 8015551234:");
+			while ((telephone = in.readLine()) == null && telephone.length() == 0);			
+			System.out.println("Enter 4 digit year established eg. 2015:");
+			while ((yearest = in.readLine()) == null && yearest.length() == 0);			
+			System.out.println("Enter hours of operation, separated by a dash, eg. 8-5, 9-6:");
+			while ((hours = in.readLine()) == null && hours.length() == 0);			
+			System.out.println("Enter avg price of a transaction:");
+			while ((price = in.readLine()) == null && price.length() == 0);			
+			System.out.println("Enter single word POI category, eg. Grocery, Services, Restaurant:");
+			while ((category = in.readLine()) == null && category.length() == 0);
+
+			POI poi = new POI();
+			if(poi.newPOI(name, city, state, url, telephone, yearest, hours, price, category, con.stmt)) {
+				System.out.println("New POI added successfully\n");
+				break;
+			}
+			else {
+				System.out.println("New POI NOT ADDED. Please try again\n");
+			}
+		}
+	}
+	
+	public static void modPOI(Connector con) throws Exception {
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+		
+		String updateField = null; 
+		String name = null;
+		String choice = null;
+		String updateVar = null;
+		int c = 0;
+		
+		mod: while(true) {
+			System.out.println("	Add New POI	");
+			System.out.println("Enter POI Name to modify:");
+			while ((name = in.readLine()) == null && name.length() == 0);
+			
+			System.out.println("Choose field to modify:");
+	   	 	System.out.println("1. POI City");
+	   	 	System.out.println("2. POI State");
+	   	 	System.out.println("3. POI URL");
+	   	 	System.out.println("4. POI Telephone");
+	   	 	System.out.println("5. POI Year Established");
+	   	 	System.out.println("6. POI Hours of Operation");
+	   	 	System.out.println("7. POI Avg. Price");
+	   	 	System.out.println("8. POI Category");
+	   	 	System.out.println("9. Return to Previous Menu");
+	   	 	
+	   	 	while ((choice = in.readLine()) == null && choice.length() == 0);
+		 	try {
+		 		c = Integer.parseInt(choice);
+		 	}
+		 	catch (Exception e) {
+		 		continue;
+		 	}
+		 	
+		 	switch(c) {
+	 	 	case(1):
+	 	 		updateField = "city";
+	 	 		break;
+	 	 	case(2):
+	 	 		updateField = "state";
+	 	 		break;
+	 	 	case(3):
+	 	 		updateField = "url";
+	 	 		break;
+	 	 	case(4):
+	 	 		updateField = "telephone";
+	 	 		break;
+	 	 	case(5):
+	 	 		updateField = "yearest";
+	 	 		break;
+	 	 	case(6):
+	 	 		updateField = "hours";
+	 	 		break;
+	 	 	case(7):
+	 	 		updateField = "price";
+	 	 		break;
+	 	 	case(8):
+	 	 		updateField = "category";
+	 	 		break;
+	 	 	case(9):
+	 	 	default:
+	 	 		break mod;
+	 	 	}
+		 	
+		 	System.out.println("Enter new information:");
+			while ((updateVar = in.readLine()) == null && updateVar.length() == 0);
+			
+		 	POI poi = new POI();
+			if(poi.updatePOI(name, updateField, updateVar, con.stmt)) {
+				System.out.println("POI updated successfully\n");
+				break;
+			}
+			else {
+				System.out.println("POI NOT CHANGED. Please try again\n");
+				break;
+			}
+		}		
+	}
+	
+	public static void awards(Connector con) throws Exception{
 		
 	}
 	
-	public static void modPOI() {
-		
-	}
-	
-	public static void awards() {
-		
-	}
-	
-	public static void userMenu() throws Exception {
+	public static void userMenu(Connector con) throws Exception {
 		int c;
 		String choice;
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
@@ -210,20 +314,20 @@ public class utrack {
 		    		if(userType == "false") {
 		    			System.out.println("Passwords do not match, please try again");
 		    		}
-		    		else if(userType == "mismatch") {
+		    		else if(userType.equals("mismatch")) {
 		    			System.out.println("Login does not exist. Please register as a new user\n");
 		    			continue;
 		    		}
-		    		else if(userType == "admin"){
-		    			adminMenu();
+		    		else if(userType.equals("admin")) {
+		    			adminMenu(con);
 		    		}
 		    		else {
-		    			userMenu();
+		    			userMenu(con);
 		    		}
 		    	}
 		    	else if (c==2) {	 
 		    		regSuccess = registerMenu(con);
-		    		if(regSuccess == "success") {
+		    		if(regSuccess.equals("success")) {
 		    			System.out.println("Thank you for registering. You may now login");
 		    		}
 		    		else {
