@@ -51,6 +51,25 @@ public class POI {
 					+"SET " +updateField +"='" +updateVar +"'"
 					+" WHERE name='" +name +"';";
 		
+		int rs = 0;
+		//System.out.println("executing "+ sql);
+	 	try {
+	 		rs = stmt.executeUpdate(sql);
+	 		
+	 		if(rs > 0) {
+	 			return true;
+	 		}
+	 		else {
+	 			return false;
+	 		}
+	 	}
+	 	catch(Exception e) {
+	 		System.err.println(e.getMessage());
+	 	}
 		return false;
+	}
+	
+	public void browsePOI() {
+		
 	}
 }

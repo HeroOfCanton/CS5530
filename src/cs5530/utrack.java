@@ -5,7 +5,7 @@ import java.io.*;
 public class utrack {
 
 	/**
-	 * @param args
+	 * 
 	 */
 	public static void mainMenu() {
 		System.out.println("	Welcome to the UTrack System - Main Menu	");
@@ -15,7 +15,15 @@ public class utrack {
    	 	System.out.println("Please enter your choice:");
 	}
 	
-	public static String loginMenu(String userName, String userPassword, Connector con) throws Exception {
+	/**
+	 * 
+	 * @param userName
+	 * @param userPassword
+	 * @param con
+	 * @return
+	 * @throws Exception
+	 */
+	public static String[] loginMenu(String userName, String userPassword, Connector con) throws Exception {
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		
 		System.out.println("	Login Menu	");
@@ -25,9 +33,18 @@ public class utrack {
 		while ((userPassword = in.readLine()) == null && userPassword.length() == 0);
 		
 		Login login = new Login();
-		return login.verifyLogin(userName, userPassword, con.stmt);
+		String type = login.verifyLogin(userName, userPassword, con.stmt);
+		
+		String[] userArr = {userName, type};
+		return userArr;
 	}
 	
+	/**
+	 * 
+	 * @param con
+	 * @return
+	 * @throws IOException
+	 */
 	public static String registerMenu(Connector con) throws IOException {
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		
@@ -58,7 +75,11 @@ public class utrack {
 			}
 		}
 	}
-	
+	/**
+	 * 
+	 * @param con
+	 * @throws Exception
+	 */
 	public static void adminMenu(Connector con) throws Exception {
 		int c;
 		String choice;
@@ -97,6 +118,11 @@ public class utrack {
 		}
 	}
 	
+	/**
+	 * 
+	 * @param con
+	 * @throws Exception
+	 */
 	public static void newPOI(Connector con) throws Exception {
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		
@@ -133,6 +159,11 @@ public class utrack {
 		}
 	}
 	
+	/**
+	 * 
+	 * @param con
+	 * @throws Exception
+	 */
 	public static void modPOI(Connector con) throws Exception {
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		
@@ -211,11 +242,21 @@ public class utrack {
 		}		
 	}
 	
+	/**
+	 * 
+	 * @param con
+	 * @throws Exception
+	 */
 	public static void awards(Connector con) throws Exception{
 		
 	}
 	
-	public static void userMenu(Connector con) throws Exception {
+	/**
+	 * 
+	 * @param con
+	 * @throws Exception
+	 */
+	public static void userMenu(String userName, Connector con) throws Exception {
 		int c;
 		String choice;
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
@@ -246,12 +287,12 @@ public class utrack {
 	 	 		feedback();
 	 	 		break;
 	 	 	case(3):
-	 	 		favorites();
+	 	 		favorites(userName, con);
 	 	 		break;
 	 	 	case(4):
-	 	 		visit();
+	 	 		visit(con);
 	 	 	case(5):
-	 	 		trusted();
+	 	 		trusted(con);
 	 	 	case(6):
 	 	 	default:
 	 	 		break user;
@@ -267,18 +308,76 @@ public class utrack {
 			
 	}
 	
-	public static void favorites() {
+	/**
+	 * 
+	 * @param userName
+	 * @param con
+	 * @throws Exception 
+	 */
+	public static void favorites(String userName, Connector con) throws Exception {
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+		Favorite favorite = new Favorite();
+		
+		// Function to check to see if user has favorite
+		String existingFavorite = favorite.hasFavorite(userName, con.stmt);
+		
+		String newVar = null;			// User's new favorite name
+		String changeFavorite = null;	// User's decision to change favorite
+		String changeVar = null;		// User's change favorite name
+		
+		// User has no favorite, so ask them for it, and save it
+		if(existingFavorite.equals("")) {
+			System.out.println("You don't have a favorite already selected.");
+			System.out.println("Please enter the name of your favorite POI");
+			while ((newVar = in.readLine()) == null && newVar.length() == 0);
+			if(favorite.saveFavorite(userName, newVar, con.stmt)) {
+				System.out.println("Your Favorite has been recorded\n");
+			}
+			else {
+				System.out.println("Favorite not saved. Try again\n");
+			}
+		}
+		// User has a favorite, so display it, then ask if they want to change it
+		else {
+			System.out.println("Your current favorite is: " +existingFavorite);
+			System.out.println("Would you like to change it? Y/N");
+			while ((changeFavorite = in.readLine()) == null && changeFavorite.length() == 0);
+			// They want to change it
+			if(changeFavorite.equals("Y") || changeFavorite.equals("y")) {
+				System.out.println("What would you like to change it to?");
+				while ((changeVar = in.readLine()) == null && changeVar.length() == 0);
+				if(favorite.changeFavorite(userName, changeVar, con.stmt)) {
+					System.out.println("Your favorite has been changed\n");
+				}
+				else {
+					System.out.println("Your favorite has not been changed. Try again.\n");
+				}
+			}
+			// They don't want to change it
+			else if(changeFavorite.equals("N") || changeFavorite.equals("n")) {
+				System.out.println("Then why are you here?");
+				return;
+			}
+			// They're being cheeky
+			else {
+				System.out.println("You didn't answer Y or N. Goodbye.");
+				System.exit(0);
+			}
+		}
+	}
+	
+	public static void visit(Connector con) throws Exception {
 		
 	}
 	
-	public static void visit() {
+	public static void trusted(Connector con) throws Exception {
 		
 	}
 	
-	public static void trusted() {
-		
-	}
-	
+	/**
+	 * 
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		Connector con = null;
 		String choice;
@@ -310,8 +409,11 @@ public class utrack {
 		    		 continue;
 		    	}
 		    	if (c == 1) {
-		    		userType = loginMenu(userName, userPassword, con); 
-		    		if(userType == "false") {
+		    		String[] userInfo = loginMenu(userName, userPassword, con);
+		    		userName = userInfo[0];
+		    		userType = userInfo[1];
+		    		
+		    		if(userType.equals("false")) {
 		    			System.out.println("Passwords do not match, please try again");
 		    		}
 		    		else if(userType.equals("mismatch")) {
@@ -322,7 +424,7 @@ public class utrack {
 		    			adminMenu(con);
 		    		}
 		    		else {
-		    			userMenu(con);
+		    			userMenu(userName, con);
 		    		}
 		    	}
 		    	else if (c==2) {	 
