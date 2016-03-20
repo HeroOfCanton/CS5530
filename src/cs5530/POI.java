@@ -1,5 +1,6 @@
 package cs5530;
 
+import java.sql.ResultSet;
 import java.sql.Statement;
 
 public class POI {
@@ -71,5 +72,41 @@ public class POI {
 	
 	public void browsePOI() {
 		
+	}
+	
+	public String getPid (String name, Statement stmt) {
+		String pid = "";		
+		String sql="SELECT pid FROM POI "
+				+  "WHERE name ='" +name +"'";		
+		ResultSet rs = null;
+		int count = 0;
+		
+//		System.out.println("executing "+sql);
+	 	try {
+	 		rs = stmt.executeQuery(sql);
+	 		while (rs.next()) {
+	 			pid = rs.getString("pid");
+	 			count++;
+	 		}	 		
+	 		// Check to see if query was empty
+	 		if (count < 1) {    
+	 			 return "";
+	 		}
+	 		rs.close();
+	 	}
+	 	catch(Exception e) {
+	 		System.out.println("Database error. Please contact System Administrator");
+	 		System.err.println(e.getMessage());
+	 	}
+	 	finally {
+ 			try {
+	 			if (rs!=null && !rs.isClosed())
+	 				rs.close();
+	 		}
+	 		catch(Exception e) {
+	 			System.out.println("Can not close resultset");
+	 		}
+	 	}
+		return pid;
 	}
 }

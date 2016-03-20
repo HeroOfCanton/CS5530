@@ -4,7 +4,6 @@ import java.sql.*;
 import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 
 public class Favorite {
 
@@ -54,8 +53,6 @@ public class Favorite {
 		DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
 		Date date = new Date();
 		String currentDate = dateFormat.format(date);
-		
-		String pid = null;
 		String sql="INSERT INTO Favorites (pid, login, fvdate) "
 		  + "VALUES ((SELECT pid from POI WHERE name ='"+newFavorite +"'), '" +userName +"', '" +currentDate +"');";
 		

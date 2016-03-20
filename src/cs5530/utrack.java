@@ -1,6 +1,9 @@
 package cs5530;
 
 import java.io.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class utrack {
 
@@ -284,15 +287,17 @@ public class utrack {
 	 	 		browsePOI();
 	 	 		break;
 	 	 	case(2):
-	 	 		feedback();
+	 	 		feedback(userName, con);
 	 	 		break;
 	 	 	case(3):
 	 	 		favorites(userName, con);
 	 	 		break;
 	 	 	case(4):
-	 	 		visit(con);
+	 	 		visit(userName, con);
+	 	 		break;
 	 	 	case(5):
 	 	 		trusted(con);
+	 	 		break;
 	 	 	case(6):
 	 	 	default:
 	 	 		break user;
@@ -304,7 +309,7 @@ public class utrack {
 		
 	}
 	
-	public static void feedback() {
+	public static void feedback(String userName, Connector con) {
 			
 	}
 	
@@ -366,8 +371,101 @@ public class utrack {
 		}
 	}
 	
-	public static void visit(Connector con) throws Exception {
+	public static void visit(String userName, Connector con) throws Exception {
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+		Visit visit = new Visit();
+		POI poi = new POI();
+		String poiName;
+		String changeText;
+		String cost;
+		String numofheads;
+		String visitToday;
+		String visitdate = null;
+		boolean change = true;
 		
+		// Visits have to be done in several stages, because of how the DB is setup
+		// Get the pid of the POI and save it for later
+		System.out.println("Enter the name of the POI to record a visit:");
+		while ((poiName = in.readLine()) == null && poiName.length() == 0);
+		String pid = poi.getPid(poiName, con.stmt);
+		if(pid.equals("")) {
+			System.out.println("That POI does not exist\n");
+			return;
+		}
+		
+		// Now to get the information for the VisEvent table
+		System.out.println("What was the total amount spent in this visit?");
+		while ((cost = in.readLine()) == null && cost.length() == 0);
+		System.out.println("How many people were in the party?");
+		while ((numofheads = in.readLine()) == null && numofheads.length() == 0);
+		
+		// Get date for Visit table
+		System.out.println("Did you visit today?");
+		while ((visitToday = in.readLine()) == null && visitToday.length() == 0);
+		if(visitToday.equals("Y") || visitToday.equals("y")) {
+			DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+			Date date = new Date();
+			visitdate = dateFormat.format(date);
+		}
+		else if(visitToday.equals("N") || visitToday.equals("n")) {
+			System.out.println("Please enter date you visited as mm/dd/yyyy");
+			while ((visitdate = in.readLine()) == null && visitdate.length() == 0);
+		}
+		else {
+			System.out.println("You didn't answer Y or N. Goodbye.");
+			System.exit(0);
+		}
+		
+		// Gotta loop in case they want to change
+		while(change) {
+			System.out.println("Here's what you said about "+poiName);
+			System.out.println("Cost: " +cost);
+			System.out.println("Number of people in party: " +numofheads);
+			System.out.println("Date Visited: " + visitdate);
+			System.out.println("Do you want to change it before saving?");
+			while ((changeText = in.readLine()) == null && changeText.length() == 0);
+			if(changeText.equals("Y") || changeText.equals("y")) {
+				System.out.println("Enter the name of the POI to record a visit:");
+				while ((poiName = in.readLine()) == null && poiName.length() == 0);
+				pid = poi.getPid(poiName, con.stmt);
+				
+				// Now to get the information for the VisEvent table
+				System.out.println("What was the total amount spent in this visit?");
+				while ((cost = in.readLine()) == null && cost.length() == 0);
+				System.out.println("How many people were in the party?");
+				while ((numofheads = in.readLine()) == null && numofheads.length() == 0);
+				
+				// Get date for Visit table
+				System.out.println("Did you visit today?");
+				while ((visitToday = in.readLine()) == null && visitToday.length() == 0);
+				if(visitToday.equals("Y") || visitToday.equals("y")) {
+					DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+					Date date = new Date();
+					visitdate = dateFormat.format(date);
+				}
+				else if(visitToday.equals("N") || visitToday.equals("n")) {
+					System.out.println("Please enter date you visited as mm/dd/yyyy");
+					while ((visitdate = in.readLine()) == null && visitdate.length() == 0);
+				}
+				else {
+					System.out.println("You didn't answer Y or N. Goodbye.");
+					System.exit(0);
+				}
+			}
+			else if(changeText.equals("N") || changeText.equals("n")) {
+				if(visit.addtoDB(userName, pid, cost, numofheads, visitdate, con.stmt)) {
+					change = false;
+					System.out.println("Your visit has been recorded\n");
+				}
+				else {
+					System.out.println("Your visit has not been recorded. Try again.\n");
+				}
+			}
+			else {
+				System.out.println("You didn't answer Y or N. Goodbye.");
+				System.exit(0);
+			}
+		}		
 	}
 	
 	public static void trusted(Connector con) throws Exception {
