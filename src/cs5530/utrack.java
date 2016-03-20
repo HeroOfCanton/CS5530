@@ -8,9 +8,9 @@ import java.util.Date;
 public class utrack {
 
 	/**
-	 * 
+	 * Displays the main menu after connection
 	 */
-	public static void mainMenu() {
+	private static void mainMenu() {
 		System.out.println("	Welcome to the UTrack System - Main Menu	");
    	 	System.out.println("1. Login");
    	 	System.out.println("2. New User Registration");
@@ -19,19 +19,23 @@ public class utrack {
 	}
 	
 	/**
+	 * Login Menu - Takes in userName, userPassword, and the DB Connector object
+	 * Calls login.verifyLogin and returns a String [] of userName and type
 	 * 
 	 * @param userName
 	 * @param userPassword
 	 * @param con
-	 * @return
+	 * @return String []
 	 * @throws Exception
 	 */
-	public static String[] loginMenu(String userName, String userPassword, Connector con) throws Exception {
+	private static String[] loginMenu(String userName, String userPassword, Connector con) throws Exception {
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		
 		System.out.println("	Login Menu	");
 		System.out.println("Please enter your username:");
 		while ((userName = in.readLine()) == null && userName.length() == 0);
+		userName = userName.toLowerCase();
+		
 		System.out.println("Please enter your password:");
 		while ((userPassword = in.readLine()) == null && userPassword.length() == 0);
 		
@@ -43,12 +47,16 @@ public class utrack {
 	}
 	
 	/**
+	 * Registration Menu - takes in DB Connector object, collects users
+	 * registration input, calls register.registerUser and passes in 
+	 * login, realName, password, city, state, and telephone to be saved in database
+	 * Returns true if user was saved in DB
 	 * 
 	 * @param con
-	 * @return
-	 * @throws IOException
+	 * @return boolean
+	 * @throws Exception
 	 */
-	public static String registerMenu(Connector con) throws IOException {
+	private static boolean registerMenu(Connector con) throws Exception {
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		
 		String login, realName, password1, password2, city, state, telephone;		
@@ -74,16 +82,23 @@ public class utrack {
 			}
 			else {
 				Register register = new Register();
-				return register.registerUser(login, realName, password1, city, state, telephone, con.stmt);
+				if(register.registerUser(login, realName, password1, city, state, telephone, con.stmt)) {
+					return true;
+				}
+				else {
+					return false;
+				}
 			}
 		}
 	}
 	/**
+	 * Admin Menu - takes in DB Connector object, let's user choose an option
+	 * and then calls those submenu / option functions
 	 * 
 	 * @param con
 	 * @throws Exception
 	 */
-	public static void adminMenu(Connector con) throws Exception {
+	private static void adminMenu(Connector con) throws Exception {
 		int c;
 		String choice;
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
@@ -309,8 +324,59 @@ public class utrack {
 		
 	}
 	
-	public static void feedback(String userName, Connector con) {
-			
+	/**
+	 * 
+	 * @param userName
+	 * @param con
+	 * @throws Exception
+	 */
+	private static void feedback(String userName, Connector con) throws Exception {
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+		Feedback feedback = new Feedback();
+		POI poi = new POI();
+		String poiName;
+		String fbdate;
+		String feedbackScore;
+		String feedbackReview = "";
+		String feedbackChoice;
+		
+		System.out.println("Enter the name of the POI you wish to leave feedback for:");
+		while ((poiName = in.readLine()) == null && poiName.length() == 0);
+		String pid = poi.getPid(poiName, con.stmt);
+		if(pid.equals("")) {
+			System.out.println("That POI does not exist\n");
+			return;
+		}
+		if(feedback.canGiveFeedback(pid, userName, con.stmt)) {
+			DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+			Date date = new Date();
+			fbdate = dateFormat.format(date);
+			System.out.println("Please enter a score for this POI, between 0-10:");
+			while ((feedbackScore = in.readLine()) == null && feedbackScore.length() == 0);
+			System.out.println("Would you like to leave a short review?");
+			while ((feedbackChoice = in.readLine()) == null && feedbackChoice.length() == 0);
+			if(feedbackChoice.equals("Y") || feedbackChoice.equals("y")) {
+				System.out.println("Please enter a short textual review:");
+				while ((feedbackReview = in.readLine()) == null && feedbackReview.length() == 0);
+				if(feedback.addFeedback(pid, userName, feedbackReview, feedbackScore, fbdate, con.stmt)) {
+					System.out.println("Your feedback has been saved\n");
+				}
+				else {
+					System.out.println("Your feedback has NOT been saved. Try again\n");
+				}
+			}
+			else {
+				if(feedback.addFeedback(pid, userName, feedbackReview, feedbackScore, fbdate, con.stmt)) {
+					System.out.println("Your feedback has been saved\n");
+				}
+				else {
+					System.out.println("Your feedback has NOT been saved. Try again\n");
+				}
+			}
+		}
+		else {
+			System.out.println("You've already given feedback for that POI. No changes allowed\n");
+		}
 	}
 	
 	/**
@@ -482,7 +548,6 @@ public class utrack {
         String userName = null;
         String userPassword = null;
         String userType = null;
-        String regSuccess = null;
         int c = 0;
 
 		try {
@@ -526,8 +591,7 @@ public class utrack {
 		    		}
 		    	}
 		    	else if (c==2) {	 
-		    		regSuccess = registerMenu(con);
-		    		if(regSuccess.equals("success")) {
+		    		if(registerMenu(con)) {
 		    			System.out.println("Thank you for registering. You may now login");
 		    		}
 		    		else {

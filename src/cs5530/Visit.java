@@ -1,15 +1,25 @@
 package cs5530;
 
 import java.sql.*;
-import java.util.Date;
-import java.text.*;
 
 public class Visit {
 	
-	Statement _stmt;
-	
 	public Visit() {}
-
+	
+	/**
+	 * Takes in userName, pid, cost, numofheads, and visitdate
+	 * Calls addtoVisEvent, which returns the vid we need to add
+	 * this information to the Visit table. Returns true only if insert
+	 * to VisEvent happened, and if this insert happens
+	 * 
+	 * @param userName
+	 * @param pid
+	 * @param cost
+	 * @param numofheads
+	 * @param visitdate
+	 * @param stmt
+	 * @return boolean
+	 */
 	public boolean addtoDB(String userName, 
 						   String pid, 
 						   String cost, 
@@ -17,8 +27,8 @@ public class Visit {
 						   String visitdate,
 						   Statement stmt) {
 		
-		_stmt = stmt;
-		String vid = addtoVisEvent(cost, numofheads, _stmt);
+
+		String vid = addtoVisEvent(cost, numofheads, stmt);
 		
 		if(vid.equals("") || vid.equals(null)) {
 			return false;
@@ -28,7 +38,7 @@ public class Visit {
 				  + "VALUES ('"+userName +"', '" +pid +"', '" +vid +"', '" +visitdate +"');";
 				
 		int success = 0;
-		System.out.println("executing "+ sql);
+//		System.out.println("executing "+ sql);
 	 	try {
 	 		success = stmt.executeUpdate(sql);
 	 		
@@ -45,19 +55,28 @@ public class Visit {
 		return false;
 	}
 	
+	/**
+	 * Helper method to add cost and numofheads into VisEvent DB; returns
+	 * the vid from that INSERT
+	 * 
+	 * @param cost
+	 * @param numofheads
+	 * @param stmt
+	 * @return String
+	 */
 	private String addtoVisEvent(String cost, String numofheads, Statement stmt) {
 		String autovalue;
 		String sql = "INSERT INTO VisEvent (cost, numofheads) "
 				+    "VALUES('" +cost +"', '" +numofheads +"');";
 		
 		int success = 0;
-		System.out.println("executing "+ sql);
+//		System.out.println("executing "+ sql);
 	 	try {
 	 		
 	 		success = stmt.executeUpdate(sql);
 	 		
 	 		if(success > 0) {
-	 			autovalue = lastid(_stmt);
+	 			autovalue = lastid(stmt);
 	 			return autovalue;
 	 		}
 	 		else {
@@ -70,6 +89,13 @@ public class Visit {
 		return "";
 	}
 	
+	/**
+	 * Helper method to get the auto increment ID of the last
+	 * thing inserted into the database
+	 * 
+	 * @param stmt
+	 * @return
+	 */
 	private String lastid(Statement stmt) {
 		String sql="SELECT last_insert_id()";
 		String output="";
@@ -105,5 +131,4 @@ public class Visit {
 	 	}
 	    return output;
 	}
-	
 }

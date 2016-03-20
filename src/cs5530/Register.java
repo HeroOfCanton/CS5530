@@ -6,7 +6,7 @@ public class Register {
 	
 	public Register() {}
 	
-	public String registerUser(String _login, 
+	public boolean registerUser(String _login, 
 							 String _realName, 
 							 String _password1, 
 							 String _city, 
@@ -23,10 +23,10 @@ public class Register {
 	 		rs = stmt.executeUpdate(sql);
 	 		
 	 		if(rs > 0) {
-	 			return "success";
+	 			return true;
 	 		}
 	 		else {
-	 			return "fail";
+	 			return false;
 	 		}
 	 	}
 	 	catch(Exception e) {
@@ -34,6 +34,6 @@ public class Register {
 	 			System.out.println("Duplicate login name detected");
 	 		}
 	 	}
-		return "fail";
+		return false;
 	}
 }
