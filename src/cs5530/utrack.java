@@ -3,6 +3,7 @@ package cs5530;
 import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class utrack {
@@ -141,7 +142,7 @@ public class utrack {
 	 * @param con
 	 * @throws Exception
 	 */
-	public static void newPOI(Connector con) throws Exception {
+	private static void newPOI(Connector con) throws Exception {
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		
 		String name, city, state, url, telephone, yearest, hours, price, category;
@@ -182,7 +183,7 @@ public class utrack {
 	 * @param con
 	 * @throws Exception
 	 */
-	public static void modPOI(Connector con) throws Exception {
+	private static void modPOI(Connector con) throws Exception {
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		
 		String updateField = null; 
@@ -265,7 +266,7 @@ public class utrack {
 	 * @param con
 	 * @throws Exception
 	 */
-	public static void awards(Connector con) throws Exception{
+	private static void awards(Connector con) throws Exception{
 		
 	}
 	
@@ -274,7 +275,7 @@ public class utrack {
 	 * @param con
 	 * @throws Exception
 	 */
-	public static void userMenu(String userName, Connector con) throws Exception {
+	private static void userMenu(String userName, Connector con) throws Exception {
 		int c;
 		String choice;
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
@@ -286,7 +287,8 @@ public class utrack {
 	   	 	System.out.println("3. Manage Favorite");
 	   	 	System.out.println("4. Record Visit");
 		 	System.out.println("5. Manage Trusted Users");
-		 	System.out.println("6. Return to Previous Menu\n");
+		 	System.out.println("6. Usefulness of other Feedbacks");
+		 	System.out.println("7. Return to Previous Menu\n");
 	   	 	System.out.println("Please enter your choice:");
 	   	 	
 	   	 	while ((choice = in.readLine()) == null && choice.length() == 0);
@@ -299,7 +301,7 @@ public class utrack {
 		 	
 		 	switch(c) {
 	 	 	case(1):
-	 	 		browsePOI();
+	 	 		browsePOI(con);
 	 	 		break;
 	 	 	case(2):
 	 	 		feedback(userName, con);
@@ -314,13 +316,133 @@ public class utrack {
 	 	 		trusted(con);
 	 	 		break;
 	 	 	case(6):
+	 	 		useful(userName, con);
+	 	 		break;
+	 	 	case(7):
 	 	 	default:
 	 	 		break user;
 	 	 	}
 		}
 	}
 	
-	public static void browsePOI() {
+	private static void useful(String userName, Connector con) throws Exception {
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+		Feedback feedback = new Feedback();
+		POI poi = new POI();
+		String poiName;
+		String rateChoice;
+		String rating;
+		String userChoice;
+		String numofFB;
+		String pid;
+		String fid;
+		ArrayList<String[]> feedbacks;
+		
+		System.out.println("Would you like to rate other feedbacks or see most useful feedbacks for a POI?");
+		System.out.println("1. Rate other feedbacks");
+		System.out.println("2. See most useful feedbacks");
+		while ((userChoice = in.readLine()) == null && userChoice.length() == 0);
+		
+		if(userChoice.equals("1")) {
+			System.out.println("Enter the name of the POI you wish to see feedback for:");
+			while ((poiName = in.readLine()) == null && poiName.length() == 0);
+			pid = poi.getPid(poiName, con.stmt);
+			if(pid.equals("")) {
+				System.out.println("That POI does not exist\n");
+				return;
+			}
+			// Get the arraylist of string arrays
+			// each array holding an fid, text, and score for the POI
+			feedbacks = feedback.getPOIFeedback(pid, "all", userName, con.stmt);
+			if(feedbacks.size() != 0) {
+				System.out.println("Here are the feedbacks for this POI.");
+				// Count should start at 1, and only increment when they get a new feedback
+				// which should correspond to a new array in this arraylist
+				int count = 1;
+				
+				// Walk the arraylist
+				for(int i = 0; i < feedbacks.size(); i++) {
+					// Get the data from the array
+					// [0] = fid, we don't need this yet, so don't display it
+					// [1] = text of feedback
+					// [2] = feedback score
+					for(int j = 0; j < 1; j++) {
+						String arr[] = feedbacks.get(i);
+						System.out.println(count + ": Feedback: " +arr[1] +" || Score: " +arr[2]);
+					}
+					// New feedback, let's increment count
+					count++;
+				}
+				
+				System.out.println("Please choose which one to rate:");
+				while ((rateChoice = in.readLine()) == null && rateChoice.length() == 0);
+				
+				// Convert their choice to an int, so we can use it in the array
+				int rateChoiceNum = Integer.parseInt(rateChoice);
+				
+				// Arrays start at 0, user's options start at 1, so -- to make them match
+				rateChoiceNum--;
+				
+				System.out.println("On a scale of 0 - Useless / 1 - Useful / 2 - Very Useful");
+				System.out.println("Rate this feedback:");
+				while ((rating = in.readLine()) == null && rating.length() == 0);
+				
+				// If all goes well, their ratechoice has been converted to an int at this point
+				// and that should correspond to the arraylist position of the feedback they want to rate
+				// and hopefully this janky looking syntax works
+				fid = feedbacks.get(rateChoiceNum)[0];
+				
+				// Now that we have it all, let's try adding it to the Rates table
+				if(feedback.rateFeedback(userName, fid, rating, con.stmt)) {
+					System.out.println("Your rating has been saved successfully");
+				}
+				else {
+					System.out.println("Your rating has not been saved");
+				}
+			}
+			else {
+				System.out.println("No feedbacks currently on file for that POI");
+			}
+		}
+		else {
+			System.out.println("Enter the name of the POI you wish to see feedback for:");
+			while ((poiName = in.readLine()) == null && poiName.length() == 0);
+			pid = poi.getPid(poiName, con.stmt);
+			if(pid.equals("")) {
+				System.out.println("That POI does not exist\n");
+				return;
+			}
+			System.out.println("How many would you like to see?");
+			while ((numofFB = in.readLine()) == null && numofFB.length() == 0);
+			feedbacks = feedback.getPOIFeedback(pid, numofFB, userName, con.stmt);
+			if(feedbacks.size() != 0) {
+				System.out.println("Here are the feedbacks for this POI.");
+				// Count should start at 1, and only increment when they get a new feedback
+				// which should correspond to a new array in this arraylist
+				int count = 1;
+				
+				// Walk the arraylist
+				for(int i = 0; i < feedbacks.size(); i++) {
+					// Get the data from the array
+					// [0] = fid, we don't need this yet, so don't display it
+					// [1] = text of feedback
+					// [2] = feedback score
+					for(int j = 0; j < 1; j++) {
+						String arr[] = feedbacks.get(i);
+						System.out.println(count + ": Feedback: " +arr[0] +" || Score: " +arr[1]);
+					}
+					// New feedback, let's increment count
+					count++;
+				}
+				System.out.println("\n");
+			}
+			else {
+				System.out.println("No feedbacks currently on file for that POI");
+			}
+		}
+	}
+
+	private static void browsePOI(Connector con) {
 		
 	}
 	
@@ -385,7 +507,7 @@ public class utrack {
 	 * @param con
 	 * @throws Exception 
 	 */
-	public static void favorites(String userName, Connector con) throws Exception {
+	private static void favorites(String userName, Connector con) throws Exception {
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		Favorite favorite = new Favorite();
 		
@@ -437,7 +559,7 @@ public class utrack {
 		}
 	}
 	
-	public static void visit(String userName, Connector con) throws Exception {
+	private static void visit(String userName, Connector con) throws Exception {
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		Visit visit = new Visit();
 		POI poi = new POI();
@@ -534,7 +656,7 @@ public class utrack {
 		}		
 	}
 	
-	public static void trusted(Connector con) throws Exception {
+	private static void trusted(Connector con) throws Exception {
 		
 	}
 	
