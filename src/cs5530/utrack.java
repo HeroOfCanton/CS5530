@@ -313,7 +313,7 @@ public class utrack {
 	 	 		visit(userName, con);
 	 	 		break;
 	 	 	case(5):
-	 	 		trusted(con);
+	 	 		trusted(userName, con);
 	 	 		break;
 	 	 	case(6):
 	 	 		useful(userName, con);
@@ -442,7 +442,61 @@ public class utrack {
 		}
 	}
 
-	private static void browsePOI(Connector con) {
+	private static void browsePOI(Connector con) throws Exception {
+		int c = 0;
+		String sort;
+		String choice;
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+		POI poi = new POI();
+		
+		System.out.println("Please choose how to browse the POIs:");
+		System.out.println("1. POI by price range");
+   	 	System.out.println("2. POI by City / State");
+   	 	System.out.println("3. POI by Keywords");
+   	 	System.out.println("4. POI by Category");
+   	 	
+   	 	while ((choice = in.readLine()) == null && choice.length() == 0);
+	 	try {
+	 		c = Integer.parseInt(choice);
+	 	}
+	 	catch (Exception e) {
+	 		System.out.println(e.getMessage());
+	 	}
+	 	
+	 	System.out.println("Choose how you want the results sorted:");
+	 	System.out.println("1. By price");
+   	 	System.out.println("2. By avg feedbacks");
+   	 	System.out.println("3. By avg score of trusted user feedbacks");
+   	 	while ((choice = in.readLine()) == null && choice.length() == 0);
+	 	if(choice.equals("1"))
+	 		sort = "price";
+	 	else if(choice.equals("2"))
+	 		sort = "feedback";
+	 	else if(choice.equals("3"))
+	 		sort = "trusted";
+	 	else {
+	 		System.out.println("You didn't enter the right choice");
+	 		System.exit(0);
+	 	}
+	 		
+	 	switch(c) {
+	 	case(1):
+	 		String lowPrice, highPrice;
+	 		System.out.println("Please enter the low Price:");
+	 		while ((lowPrice = in.readLine()) == null && lowPrice.length() == 0);
+	 		System.out.println("Please enter the high Price:");
+	 		while ((highPrice = in.readLine()) == null && highPrice.length() == 0);
+	 		poi.getPrice(lowPrice, highPrice, con.stmt);
+	 		break;
+	 	case(2):
+	 		break;
+	 	case(3):
+	 		break;
+	 	case(4):
+	 		break;
+	 	default:
+	 		break;
+	 	}
 		
 	}
 	
@@ -656,8 +710,30 @@ public class utrack {
 		}		
 	}
 	
-	private static void trusted(Connector con) throws Exception {
+	private static void trusted(String userName, Connector con) throws Exception {
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+		User user = new User();
+		String otherUser;
+		String otherLogin;
+		String trustVar;
 		
+		System.out.println("Enter the first and last name of the user you'd like to mark trusted / untrusted");
+		while ((otherUser = in.readLine()) == null && otherUser.length() == 0);
+		otherLogin = user.getLogin(otherUser, con.stmt);
+		
+		if(otherLogin.equals("")) {
+			System.out.println("No user found with that name. Try again.\n");
+		}
+		else {
+			System.out.println("Mark user as 'trusted' or 'untrusted'?");
+			while ((trustVar = in.readLine()) == null && trustVar.length() == 0);
+			if(user.setTrust(userName, otherLogin, trustVar, con.stmt)) {
+				System.out.println("User has been marked as " +trustVar + "\n");
+			}
+			else {
+				System.out.println("User has not been marked. Try again.\n");
+			}
+		}
 	}
 	
 	/**

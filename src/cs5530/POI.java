@@ -109,4 +109,9 @@ public class POI {
 	 	}
 		return pid;
 	}
+
+	public void getPrice(String lowPrice, String highPrice, Statement stmt) {
+		// TODO Auto-generated method stub
+		
+	}
 }
