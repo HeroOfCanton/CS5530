@@ -1,6 +1,7 @@
 package cs5530;
 
 import java.sql.*;
+import java.util.ArrayList;
 
 public class Visit {
 	
@@ -130,5 +131,47 @@ public class Visit {
 	 		}
 	 	}
 	    return output;
+	}
+	
+	public ArrayList<String []> getVisitSuggestions(String pid, Statement stmt) {
+		
+		ArrayList<String []> arr = new ArrayList<String []> ();
+		String[] suggestions = new String[3];
+		
+		String sql = "SELECT Visit.PID, POI.name, count(*) AS visits FROM Visit"
+				+ 	 " LEFT JOIN POI"
+				+ 	 " ON Visit.pid = POI.pid"
+				+ 	 " WHERE login IN"
+				+  	 "	(SELECT distinct login from Visit WHERE pid = '" +pid +"')"
+				+ 	 " AND NOT POI.pid = '" +pid +"'"
+				+ 	 " group by pid"
+				+ 	 " order by visits desc;";
+
+		ResultSet rs = null;
+//		System.out.println("executing "+sql);
+	 	try {
+	 		rs = stmt.executeQuery(sql);
+	 		while (rs.next()) {
+	 			suggestions = new String[3];
+	 			suggestions[0] = rs.getString("name");
+	 			suggestions[1] = rs.getString("visits");
+	 			arr.add(suggestions);
+	 		}
+	 		return arr;
+	 	}
+	 	catch(Exception e) {
+	 		System.out.println("Database error. Please contact System Administrator");
+	 		System.err.println(e.getMessage());
+	 	}
+	 	finally {
+ 			try {
+	 			if (rs!=null && !rs.isClosed())
+	 				rs.close();
+	 		}
+	 		catch(Exception e) {
+	 			System.out.println("Can not close resultset");
+	 		}
+		}
+		return arr;
 	}
 }

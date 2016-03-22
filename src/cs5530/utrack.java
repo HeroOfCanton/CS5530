@@ -624,6 +624,7 @@ public class utrack {
 		String visitToday;
 		String visitdate = null;
 		boolean change = true;
+		ArrayList<String []> suggestions = new ArrayList<String []>();
 		
 		// Visits have to be done in several stages, because of how the DB is setup
 		// Get the pid of the POI and save it for later
@@ -698,6 +699,25 @@ public class utrack {
 				if(visit.addtoDB(userName, pid, cost, numofheads, visitdate, con.stmt)) {
 					change = false;
 					System.out.println("Your visit has been recorded\n");
+					System.out.println("Here are some other Points of Interest you might like:");
+					suggestions = visit.getVisitSuggestions(pid, con.stmt);
+					// Count should start at 1, and only increment when they get a new feedback
+					// which should correspond to a new array in this arraylist
+					int count = 1;
+					
+					// Walk the arraylist
+					for(int i = 0; i < suggestions.size(); i++) {
+						// Get the data from the array
+						// [0] = pid name
+						// [1] = num of visits
+						for(int j = 0; j < 1; j++) {
+							String arr[] = suggestions.get(i);
+							System.out.println(count + "- POI Name: " +arr[0] +" || Number of Times Visited: " +arr[1]);
+						}
+						// New feedback, let's increment count
+						count++;
+					}
+					System.out.println("\n");
 				}
 				else {
 					System.out.println("Your visit has not been recorded. Try again.\n");
