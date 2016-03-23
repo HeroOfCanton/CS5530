@@ -266,8 +266,67 @@ public class utrack {
 	 * @param con
 	 * @throws Exception
 	 */
-	private static void awards(Connector con) throws Exception{
+	private static void awards(Connector con) throws Exception {
+		int c = 0;
+		int count = 1;
+		String number;
+		String choice;
+		ArrayList<String[]> most = null;
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+		Awards award = new Awards();
 		
+		System.out.println("How many records would you like to return?");
+	 	while ((number = in.readLine()) == null && number.length() == 0);
+	 	int numOfRecords = Integer.parseInt(number);
+		
+		System.out.println("Please choose the type of users to display, for awards:");
+		System.out.println("1: Most trusted users");
+		System.out.println("2: Most useful users");
+		System.out.println("3: Return to previous menu");
+
+		while ((choice = in.readLine()) == null && choice.length() == 0);
+	 	try {
+	 		c = Integer.parseInt(choice);
+	 	}
+	 	catch (Exception e) {
+	 		System.out.println(e.getMessage());
+	 	}
+	 	
+	 	switch(c) {
+ 	 	case(1):
+ 	 		most = award.getTrusted(numOfRecords, con.stmt);
+	 	 	System.out.println("Here is your list of trusted users:");
+		 	// Walk the arraylist
+			for(int i = 0; i < most.size(); i++) {
+				// Get the data from the array
+				// [0] = pid name
+				// [1] = num of visits
+				String arr[] = most.get(i);
+				System.out.println(count + "- User Name: " +arr[0] +" || Total Trust Score: " +arr[1]);
+				// New feedback, let's increment count
+				count++;
+			}
+			System.out.println("\n");
+ 	 		break;
+ 	 	case(2):
+ 	 		most = award.getUseful(numOfRecords, con.stmt);
+	 	 	System.out.println("Here is your list of useful users:");
+		 	// Walk the arraylist
+			for(int i = 0; i < most.size(); i++) {
+				// Get the data from the array
+				// [0] = pid name
+				// [1] = num of visits
+				String arr[] = most.get(i);
+				System.out.println(count + "- User Name: " +arr[0] +" || Avg Useful Score: " +arr[1]);
+				// New feedback, let's increment count
+				count++;
+			}
+			System.out.println("\n");
+ 	 		break;
+	 	case(3):
+	 	default:
+	 		break;
+	 	}
 	}
 	
 	/**
@@ -288,7 +347,8 @@ public class utrack {
 	   	 	System.out.println("4. Record Visit");
 		 	System.out.println("5. Manage Trusted Users");
 		 	System.out.println("6. Usefulness of other Feedbacks");
-		 	System.out.println("7. Return to Previous Menu\n");
+		 	System.out.println("7. Site Statistics");
+		 	System.out.println("8. Return to Previous Menu\n");
 	   	 	System.out.println("Please enter your choice:");
 	   	 	
 	   	 	while ((choice = in.readLine()) == null && choice.length() == 0);
@@ -319,12 +379,69 @@ public class utrack {
 	 	 		useful(userName, con);
 	 	 		break;
 	 	 	case(7):
+	 	 		statistics(con);
+	 	 		break;
+	 	 	case(8):
 	 	 	default:
 	 	 		break user;
 	 	 	}
 		}
 	}
 	
+	private static void statistics(Connector con) throws Exception {
+		System.out.println("Please choose a category to view:");
+		System.out.println("1: Most popular POI's");
+		System.out.println("2: Most expensive POI's");
+		System.out.println("3: Highly rated POI's");
+		System.out.println("4: Return to previous menu");
+		
+		int c = 0;
+		int count = 1;
+		String choice;
+		ArrayList<String []> results = new ArrayList<String []> ();
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+		POI poi = new POI();
+		
+		stats: while(true){
+			while ((choice = in.readLine()) == null && choice.length() == 0);
+		 	try {
+		 		c = Integer.parseInt(choice);
+		 	}
+		 	catch (Exception e) {
+		 		System.out.println(e.getMessage());
+		 	}
+		 	
+		 	switch(c) {
+	 	 	case(1):
+	 	 		results = poi.getPopular(con);
+	 	 		break;
+	 	 	case(2):
+	 	 		results = poi.getExpensive(con);
+	 	 		break;
+	 	 	case(3):
+	 	 		results = poi.getRated(con);
+	 	 		break;
+	 	 	case(4):
+	 	 	default:
+	 	 		break stats;
+	 	 	}
+
+		 	// Walk the arraylist
+			for(int i = 0; i < results.size(); i++) {
+				// Get the data from the array
+				// [0] = pid name
+				// [1] = num of visits
+				for(int j = 0; j < 1; j++) {
+					String[] arr = results.get(i);
+					System.out.println(count + "- POI Name: " +arr[0] +" || Number of Times Visited: " +arr[1]);
+				}
+				// New feedback, let's increment count
+				count++;
+			}
+			System.out.println("\n");
+		}
+	}
+
 	private static void useful(String userName, Connector con) throws Exception {
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		Feedback feedback = new Feedback();

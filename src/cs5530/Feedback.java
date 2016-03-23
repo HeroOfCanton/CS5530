@@ -8,7 +8,7 @@ public class Feedback {
 	public Feedback() {}
 	
 	public boolean canGiveFeedback(String pid, String login, Statement stmt) {
-		String fid = "";
+		
 		String sql="SELECT fid FROM Feedback "
 				+  "WHERE pid ='" +pid +"' AND login = '" +login +"'";
 		
@@ -19,7 +19,7 @@ public class Feedback {
 	 	try {
 	 		rs = stmt.executeQuery(sql);
 	 		while (rs.next()) {
-	 			fid = rs.getString("fid");
+	 			String fid = rs.getString("fid");
 	 			count++;
 	 		}	 		
 	 		// If count is < 1, that means there were no fid's to be found

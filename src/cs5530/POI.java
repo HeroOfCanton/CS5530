@@ -2,6 +2,7 @@ package cs5530;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 public class POI {
 	public POI() {}
@@ -111,6 +112,24 @@ public class POI {
 	}
 
 	public void getPrice(String lowPrice, String highPrice, Statement stmt) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public ArrayList<String[]> getPopular(Connector con) {
+		return null;
+		// TODO Auto-generated method stub
+		
+	}
+
+	public ArrayList<String[]> getExpensive(Connector con) {
+		return null;
+		// TODO Auto-generated method stub
+		
+	}
+
+	public ArrayList<String[]> getRated(Connector con) {
+		return null;
 		// TODO Auto-generated method stub
 		
 	}

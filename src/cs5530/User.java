@@ -9,7 +9,7 @@ public class User {
 	public String getLogin(String realName, Statement stmt) {
 		String login = "";
 		String sql = "SELECT login FROM Users"
-				+ 	 "WHERE name = '" +realName + "';";
+				+ 	 " WHERE name = '" +realName + "';";
 		
 		ResultSet rs = null;
 		int count = 0;
