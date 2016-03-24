@@ -109,7 +109,8 @@ public class utrack {
 			System.out.println("1. New POI");
 	   	 	System.out.println("2. Modify Existing POI");
 	   	 	System.out.println("3. Awards");
-	   	 	System.out.println("4. Return to previous menu\n");
+	   	 	System.out.println("4. Show degrees of separation");
+	   	 	System.out.println("5: Return to previous menu\n");
 	   	 	System.out.println("Please enter your choice:");
 	   	 	
 		   	while ((choice = in.readLine()) == null && choice.length() == 0);
@@ -131,12 +132,56 @@ public class utrack {
 	 	 		awards(con);
 	 	 		break;
 	 	 	case(4):
+	 	 		separation(con);
+	 	 		break;
+	 	 	case(5):
 	 	 	default:
 	 	 		break admin;
 	 	 	}
 		}
 	}
 	
+	private static void separation(Connector con) throws Exception {
+		String degrees;
+		String userOne;
+		String userTwo;
+		ArrayList<String> userList = new ArrayList<String> ();
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+		User user = new User();
+		
+		System.out.println("What is the real name of the first user?");
+		while ((userOne = in.readLine()) == null && userOne.length() == 0);
+		System.out.println("What is the real name of the second user?");
+		while ((userTwo = in.readLine()) == null && userTwo.length() == 0);		
+		System.out.println("Would you like to show 1 or 2 degrees of separation?");
+		while ((degrees = in.readLine()) == null && degrees.length() == 0);
+		if(degrees.equals("1")) {
+			ArrayList<String> userList2 = new ArrayList<String> ();
+			userList = user.separationOne(userOne, con.stmt);
+			userList2 = user.separationOne(userTwo, con.stmt);
+			System.out.println("Users with 1 degree of separation from "+userOne+" and "+userTwo);
+			for(String string : userList) {
+				System.out.println(string);
+			}
+			for(String string : userList2) {
+				System.out.println(string);
+			}
+			System.out.println("\n");
+		}
+		else if(degrees.equals("2")) {
+			userList = user.separationTwo(userOne, userTwo,  con.stmt);
+			System.out.println("Users with 2 degrees of separation from "+userOne+ " and " +userTwo);
+			for(String string : userList) {
+				System.out.println(string);
+			}
+			System.out.println("\n");
+		}
+		else {
+			System.out.println("No one likes a comedian");
+			System.exit(0);
+		}
+	}
+
 	/**
 	 * 
 	 * @param con
@@ -576,33 +621,30 @@ public class utrack {
 
 	private static void browsePOI(Connector con) throws Exception {
 		int c = 0;
-		String sort;
+		String sort = null;
 		String choice;
+		ArrayList<String> poiarr = null;
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		POI poi = new POI();
 		
 		System.out.println("Choose how you want the results sorted:");
 	 	System.out.println("1. By price");
    	 	System.out.println("2. By avg feedbacks");
-   	 	System.out.println("3. By avg score of trusted user feedbacks");
    	 	while ((choice = in.readLine()) == null && choice.length() == 0);
 	 	if(choice.equals("1"))
 	 		sort = "price";
 	 	else if(choice.equals("2"))
 	 		sort = "feedback";
-	 	else if(choice.equals("3"))
-	 		sort = "trusted";
 	 	else {
 	 		System.out.println("You didn't enter the right choice");
 	 		System.exit(0);
 	 	}
 		
 		System.out.println("Please choose how to browse the POIs:");
-		System.out.println("1. POI by price range");
-   	 	System.out.println("2. POI by City / State");
-   	 	System.out.println("3. POI by Keywords");
-   	 	System.out.println("4. POI by Category");
-   	 	System.out.println("5. Return to previous menu");
+		System.out.println("1. POI by City / State");
+   	 	System.out.println("2. POI by Keywords");
+   	 	System.out.println("3. POI by Category");
+   	 	System.out.println("4. Return to previous menu");
    	 	
    	 	browse: while(true) {
    	 		while ((choice = in.readLine()) == null && choice.length() == 0);
@@ -615,23 +657,52 @@ public class utrack {
 		 		
 		 	switch(c) {
 		 	case(1):
-		 		String lowPrice, highPrice;
-		 		System.out.println("Please enter the low Price:");
-		 		while ((lowPrice = in.readLine()) == null && lowPrice.length() == 0);
-		 		System.out.println("Please enter the high Price:");
-		 		while ((highPrice = in.readLine()) == null && highPrice.length() == 0);
-		 		poi.getPrice(lowPrice, highPrice, con.stmt);
+		 		String adrvar = null;
+		 		String adrchoice = null;
+		 		System.out.println("By City or State?:");
+		 		while ((adrchoice = in.readLine()) == null && adrchoice.length() == 0);
+		 		if(adrchoice.equals("city") || adrchoice.equals("City")) {
+		 			System.out.println("Enter the name of the City:");
+		 			while ((adrvar = in.readLine()) == null && adrvar.length() == 0);
+		 		}
+		 		else if(adrchoice.equals("state") || adrchoice.equals("State")) {
+		 			System.out.println("Enter the two letter abreviation for the State:");
+		 			while ((adrvar = in.readLine()) == null && adrvar.length() == 0);
+		 		}
+		 		else {
+		 			System.out.println("No one likes a funny guy");
+		 			System.exit(0);
+		 		}
+		 		poiarr = poi.getAdr(adrvar, adrchoice, sort, con.stmt);
 		 		break;
 		 	case(2):
+		 		String keyvar = null;
+		 		System.out.println("Enter the keyword to search by:");
+		 		while ((keyvar = in.readLine()) == null && keyvar.length() == 0);
+		 		poiarr = poi.getKeywords(keyvar, sort, con.stmt);
 		 		break;
 		 	case(3):
+		 		ArrayList<String>categories = poi.getCategories(con.stmt);
+		 		String catvar;
+		 		System.out.println("Here are a list of categories:");
+		 		for(String string : categories) {
+		 			System.out.println(string);
+		 		}
+		 		System.out.println("Which category would you like to search by?");
+		 		while ((catvar = in.readLine()) == null && catvar.length() == 0);
+		 		poiarr = poi.getCat(catvar, sort, con.stmt);
 		 		break;
 		 	case(4):
-		 		break;
-		 	case(5):
 		 	default:
 		 		break browse;
 		 	}
+		 	
+		 	System.out.println(" \nHere are the POI's you requested:");
+		 	for(String string : poiarr) {
+		 		System.out.println(string);
+		 	}
+		 	System.out.println("\n");
+		 	break;
    	 	}
 	}
 	

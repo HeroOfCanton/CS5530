@@ -71,10 +71,6 @@ public class POI {
 		return false;
 	}
 	
-	public void browsePOI() {
-		
-	}
-	
 	public String getPid (String name, Statement stmt) {
 		String pid = "";		
 		String sql="SELECT pid FROM POI "
@@ -110,10 +106,26 @@ public class POI {
 	 	}
 		return pid;
 	}
+	
+	public ArrayList<String> getCategories(Statement stmt) {
+		ArrayList<String> categories = new ArrayList<String>();
 
-	public void getPrice(String lowPrice, String highPrice, Statement stmt) {
-		// TODO Auto-generated method stub
+		ResultSet rs = null;
+		String sql = "SELECT category FROM POI"
+				+    " group by category";
 		
+		try {
+	 		rs = stmt.executeQuery(sql);
+	 		while (rs.next()) {
+	 			categories.add(rs.getString("category"));
+	 		}
+		}
+		
+	 	catch(Exception e) {
+		 		System.out.println("Database error. Please contact System Administrator");
+		 		System.err.println(e.getMessage());
+		}
+		return categories;
 	}
 
 	public ArrayList<String[]> getPopular(String _limit, Statement stmt) {
@@ -303,6 +315,232 @@ public class POI {
 			}
 		}
 		return arr;
+	}
+
+	public ArrayList<String> getAdr(String adrvar, String adrchoice, String sort, Statement stmt) {
+		ArrayList<String> results = new ArrayList<String> ();
+		String sql = null;
+		if(adrchoice.equals("city") || adrchoice.equals("City")) {
+			if(sort.equals("feedback")) {
+				sql = "SELECT POI.name FROM (SELECT pid FROM POI"
+						+ " WHERE city like '%"+adrvar+"%') AS poikeys "
+						+ " INNER JOIN ("
+						+ " SELECT POI.pid, avg(Rates.rating) AS Rating FROM Rates"
+						+ " LEFT JOIN Feedback"
+						+ " ON Rates.fid = Feedback.fid"
+						+ " LEFT Join POI"
+						+ " ON POI.pid = Feedback.pid"
+						+ " group by name) AS poid"
+						+ " ON poikeys.pid = poid.pid"
+						+ " LEFT JOIN POI"
+						+ " ON POI.pid = poikeys.pid"
+						+ " order by Rating desc";
+			}
+			else {
+				sql = "SELECT POI.name FROM (SELECT pid FROM POI"
+						+ " WHERE city like '%"+adrvar+"%') AS poikeys "
+						+ " INNER JOIN ("
+						+ " SELECT POI.pid, avg(VisEvent.cost) AS Average FROM VisEvent"
+						+ " LEFT JOIN Visit"
+						+ " ON Visit.vid = VisEvent.vid"
+						+ " LEFT Join POI"
+						+ " ON POI.pid = Visit.pid"
+						+ " group by name) AS poid"
+						+ " ON poikeys.pid = poid.pid"
+						+ " LEFT JOIN POI"
+						+ " ON POI.pid = poikeys.pid"
+						+ " order by Average desc";
+			}
+		}
+		else {
+			if(sort.equals("feedback")) {
+				sql = "SELECT POI.name FROM (SELECT pid FROM POI"
+						+ " WHERE state like '%"+adrvar+"%') AS poikeys "
+						+ " INNER JOIN ("
+						+ " SELECT POI.pid, avg(Rates.rating) AS Rating FROM Rates"
+						+ " LEFT JOIN Feedback"
+						+ " ON Rates.fid = Feedback.fid"
+						+ " LEFT Join POI"
+						+ " ON POI.pid = Feedback.pid"
+						+ " group by name) AS poid"
+						+ " ON poikeys.pid = poid.pid"
+						+ " LEFT JOIN POI"
+						+ " ON POI.pid = poikeys.pid"
+						+ " order by Rating desc";
+			}
+			else {
+				sql = "SELECT POI.name FROM (SELECT pid FROM POI"
+						+ " WHERE state like '%"+adrvar+"%') AS poikeys "
+						+ " INNER JOIN ("
+						+ " SELECT POI.pid, avg(VisEvent.cost) AS Average FROM VisEvent"
+						+ " LEFT JOIN Visit"
+						+ " ON Visit.vid = VisEvent.vid"
+						+ " LEFT Join POI"
+						+ " ON POI.pid = Visit.pid"
+						+ " group by name) AS poid"
+						+ " ON poikeys.pid = poid.pid"
+						+ " LEFT JOIN POI"
+						+ " ON POI.pid = poikeys.pid"
+						+ " order by Average desc";
+			}
+		}
 		
+		ResultSet rs = null;
+		
+		try {
+	 		rs = stmt.executeQuery(sql);
+	 		while (rs.next()) {
+	 			results.add(rs.getString("name"));
+	 		}
+	 	}
+	 	catch(Exception e) {
+	 		System.out.println("Database error. Please contact System Administrator");
+	 		System.err.println(e.getMessage());
+	 	} 
+		
+	 	finally {
+ 			try {
+	 			if (rs!=null && !rs.isClosed())
+	 				rs.close();
+	 		}
+	 		catch(Exception e) {
+	 			System.out.println("Can not close resultset");
+	 		}
+		}
+		return results;
+	}
+	
+
+	public ArrayList<String> getPrice(String lowPrice, String highPrice, String sort, Statement stmt) {
+		return null;
+		// TODO Auto-generated method stub
+		
+	}
+
+	public ArrayList<String> getCat(String catvar, String sort, Statement stmt) {
+		ArrayList<String> results = new ArrayList<String> ();
+		String sql = null;
+		
+		if(sort.equals("feedback")) {
+			sql = "SELECT POI.name FROM (SELECT pid FROM POI"
+					+ " WHERE category like '%"+catvar+"%') AS poikeys "
+					+ " INNER JOIN ("
+					+ " SELECT POI.pid, avg(Rates.rating) AS Rating FROM Rates"
+					+ " LEFT JOIN Feedback"
+					+ " ON Rates.fid = Feedback.fid"
+					+ " LEFT Join POI"
+					+ " ON POI.pid = Feedback.pid"
+					+ " group by name) AS poid"
+					+ " ON poikeys.pid = poid.pid"
+					+ " LEFT JOIN POI"
+					+ " ON POI.pid = poikeys.pid"
+					+ " order by Rating desc";
+		}
+		else {
+			sql = "SELECT POI.name FROM (SELECT pid FROM POI"
+					+ " WHERE category like '%"+catvar+"%') AS poikeys "
+					+ " INNER JOIN ("
+					+ " SELECT POI.pid, avg(VisEvent.cost) AS Average FROM VisEvent"
+					+ " LEFT JOIN Visit"
+					+ " ON Visit.vid = VisEvent.vid"
+					+ " LEFT Join POI"
+					+ " ON POI.pid = Visit.pid"
+					+ " group by name) AS poid"
+					+ " ON poikeys.pid = poid.pid"
+					+ " LEFT JOIN POI"
+					+ " ON POI.pid = poikeys.pid"
+					+ " order by Average desc";
+		}
+		ResultSet rs = null;
+		
+		try {
+	 		rs = stmt.executeQuery(sql);
+	 		while (rs.next()) {
+	 			results.add(rs.getString("name"));
+	 		}
+	 	}
+	 	catch(Exception e) {
+	 		System.out.println("Database error. Please contact System Administrator");
+	 		System.err.println(e.getMessage());
+	 	} 
+		
+	 	finally {
+ 			try {
+	 			if (rs!=null && !rs.isClosed())
+	 				rs.close();
+	 		}
+	 		catch(Exception e) {
+	 			System.out.println("Can not close resultset");
+	 		}
+		}
+		return results;
+	}
+
+	public ArrayList<String> getKeywords(String keyvar, String sort, Statement stmt) {
+		
+		ArrayList<String> results = new ArrayList<String> ();
+		String sql = null;
+		if(sort.equals("feedback")) {
+			sql = "SELECT POI.name FROM (SELECT POI.pid FROM HasKeywords"
+				+ " LEFT JOIN Keywords"
+				+ " ON Keywords.wid = HasKeywords.wid"
+				+ " LEFT JOIN POI"
+				+ " ON POI.pid = HasKeywords.pid "
+				+ " WHERE word like '%"+keyvar+"%') AS poikeys"
+				+ " INNER JOIN ("
+				+ " SELECT POI.pid, avg(Rates.rating) AS Rating FROM Rates"
+				+ " LEFT JOIN Feedback"
+				+ " ON Rates.fid = Feedback.fid"
+				+ " LEFT Join POI"
+				+ " ON POI.pid = Feedback.pid"
+				+ " group by name) AS poid"
+				+ " ON poikeys.pid = poid.pid"
+				+ " LEFT JOIN POI"
+				+ " ON POI.pid = poikeys.pid"
+				+ " order by Rating desc";
+		}
+		else {
+			sql = "SELECT POI.name FROM (SELECT POI.pid FROM HasKeywords"
+				+ " LEFT JOIN Keywords"
+				+ " ON Keywords.wid = HasKeywords.wid"
+				+ " LEFT JOIN POI"
+				+ " ON POI.pid = HasKeywords.pid"
+				+ " WHERE word like '%"+keyvar+"%') AS poikeys"
+				+ " INNER JOIN ("
+				+ " SELECT POI.pid, avg(VisEvent.cost) AS Average FROM VisEvent"
+				+ " LEFT JOIN Visit"
+				+ " ON Visit.vid = VisEvent.vid"
+				+ " LEFT Join POI"
+				+ " ON POI.pid = Visit.pid"
+				+ " group by name) AS poid"
+				+ " ON poikeys.pid = poid.pid"
+				+ " LEFT JOIN POI"
+				+ " ON POI.pid = poikeys.pid"
+				+ " order by Average desc";
+		}
+
+		ResultSet rs = null;
+		
+		try {
+	 		rs = stmt.executeQuery(sql);
+	 		while (rs.next()) {
+	 			results.add(rs.getString("name"));
+	 		}
+	 	}
+	 	catch(Exception e) {
+	 		System.out.println("Database error. Please contact System Administrator");
+	 		System.err.println(e.getMessage());
+	 	} 
+		
+	 	finally {
+ 			try {
+	 			if (rs!=null && !rs.isClosed())
+	 				rs.close();
+	 		}
+	 		catch(Exception e) {
+	 			System.out.println("Can not close resultset");
+	 		}
+		}
+		return results;
 	}
 }
