@@ -389,12 +389,7 @@ public class utrack {
 	}
 	
 	private static void statistics(Connector con) throws Exception {
-		System.out.println("Please choose a category to view:");
-		System.out.println("1: Most popular POI's");
-		System.out.println("2: Most expensive POI's");
-		System.out.println("3: Highly rated POI's");
-		System.out.println("4: Return to previous menu");
-		
+		String limit;
 		int c = 0;
 		int count = 1;
 		String choice;
@@ -402,43 +397,63 @@ public class utrack {
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		POI poi = new POI();
 		
-		stats: while(true){
-			while ((choice = in.readLine()) == null && choice.length() == 0);
-		 	try {
-		 		c = Integer.parseInt(choice);
-		 	}
-		 	catch (Exception e) {
-		 		System.out.println(e.getMessage());
-		 	}
-		 	
-		 	switch(c) {
-	 	 	case(1):
-	 	 		results = poi.getPopular(con);
-	 	 		break;
-	 	 	case(2):
-	 	 		results = poi.getExpensive(con);
-	 	 		break;
-	 	 	case(3):
-	 	 		results = poi.getRated(con);
-	 	 		break;
-	 	 	case(4):
-	 	 	default:
-	 	 		break stats;
-	 	 	}
-
+		System.out.println("How many records would you like to return?");
+		while ((limit = in.readLine()) == null && limit.length() == 0);
+		
+		System.out.println("Please choose a category to view:");
+		System.out.println("1: Most popular POI's");
+		System.out.println("2: Most expensive POI's");
+		System.out.println("3: Highly rated POI's");
+		System.out.println("4: Return to previous menu");
+		
+		while ((choice = in.readLine()) == null && choice.length() == 0);
+	 	try {
+	 		c = Integer.parseInt(choice);
+	 	}
+	 	catch (Exception e) {
+	 		System.out.println(e.getMessage());
+	 	}
+	 	
+	 	switch(c) {
+ 	 	case(1):
+ 	 		results = poi.getPopular(limit, con.stmt);
+	 	 	System.out.println("Here are the most popular POIs, by category: ");
 		 	// Walk the arraylist
 			for(int i = 0; i < results.size(); i++) {
-				// Get the data from the array
-				// [0] = pid name
-				// [1] = num of visits
-				for(int j = 0; j < 1; j++) {
-					String[] arr = results.get(i);
-					System.out.println(count + "- POI Name: " +arr[0] +" || Number of Times Visited: " +arr[1]);
-				}
+				String[] arr = results.get(i);
+				System.out.println(count + "- POI Name: " +arr[0] +" || Category: " +arr[1] + " || Total Visits: " + arr[2]);
 				// New feedback, let's increment count
 				count++;
 			}
 			System.out.println("\n");
+ 	 		break;
+ 	 	case(2):
+ 	 		results = poi.getExpensive(limit, con.stmt);
+	 	 	System.out.println("Here are the most expensive POIs, by category: ");
+		 	// Walk the arraylist
+			for(int i = 0; i < results.size(); i++) {
+				String[] arr = results.get(i);
+				System.out.println(count + "- POI Name: " +arr[0] +" || Category: " +arr[1] + " || Avg. Price: $" + arr[2]);
+				// New feedback, let's increment count
+				count++;
+			}
+			System.out.println("\n");
+ 	 		break;
+ 	 	case(3):
+ 	 		results = poi.getRated(limit, con.stmt);
+	 	 	System.out.println("Here are the highest rated POIs, by category: ");
+		 	// Walk the arraylist
+			for(int i = 0; i < results.size(); i++) {
+				String[] arr = results.get(i);
+				System.out.println(count + "- POI Name: " +arr[0] +" || Category: " +arr[1] + " || Avg. Rating: " + arr[2]);
+				// New feedback, let's increment count
+				count++;
+			}
+			System.out.println("\n");
+ 	 		break;
+ 	 	case(4):
+ 	 	default:
+ 	 		break;
 		}
 	}
 
@@ -566,21 +581,7 @@ public class utrack {
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		POI poi = new POI();
 		
-		System.out.println("Please choose how to browse the POIs:");
-		System.out.println("1. POI by price range");
-   	 	System.out.println("2. POI by City / State");
-   	 	System.out.println("3. POI by Keywords");
-   	 	System.out.println("4. POI by Category");
-   	 	
-   	 	while ((choice = in.readLine()) == null && choice.length() == 0);
-	 	try {
-	 		c = Integer.parseInt(choice);
-	 	}
-	 	catch (Exception e) {
-	 		System.out.println(e.getMessage());
-	 	}
-	 	
-	 	System.out.println("Choose how you want the results sorted:");
+		System.out.println("Choose how you want the results sorted:");
 	 	System.out.println("1. By price");
    	 	System.out.println("2. By avg feedbacks");
    	 	System.out.println("3. By avg score of trusted user feedbacks");
@@ -595,26 +596,43 @@ public class utrack {
 	 		System.out.println("You didn't enter the right choice");
 	 		System.exit(0);
 	 	}
-	 		
-	 	switch(c) {
-	 	case(1):
-	 		String lowPrice, highPrice;
-	 		System.out.println("Please enter the low Price:");
-	 		while ((lowPrice = in.readLine()) == null && lowPrice.length() == 0);
-	 		System.out.println("Please enter the high Price:");
-	 		while ((highPrice = in.readLine()) == null && highPrice.length() == 0);
-	 		poi.getPrice(lowPrice, highPrice, con.stmt);
-	 		break;
-	 	case(2):
-	 		break;
-	 	case(3):
-	 		break;
-	 	case(4):
-	 		break;
-	 	default:
-	 		break;
-	 	}
 		
+		System.out.println("Please choose how to browse the POIs:");
+		System.out.println("1. POI by price range");
+   	 	System.out.println("2. POI by City / State");
+   	 	System.out.println("3. POI by Keywords");
+   	 	System.out.println("4. POI by Category");
+   	 	System.out.println("5. Return to previous menu");
+   	 	
+   	 	browse: while(true) {
+   	 		while ((choice = in.readLine()) == null && choice.length() == 0);
+		 	try {
+		 		c = Integer.parseInt(choice);
+		 	}
+		 	catch (Exception e) {
+		 		System.out.println(e.getMessage());
+		 	}
+		 		
+		 	switch(c) {
+		 	case(1):
+		 		String lowPrice, highPrice;
+		 		System.out.println("Please enter the low Price:");
+		 		while ((lowPrice = in.readLine()) == null && lowPrice.length() == 0);
+		 		System.out.println("Please enter the high Price:");
+		 		while ((highPrice = in.readLine()) == null && highPrice.length() == 0);
+		 		poi.getPrice(lowPrice, highPrice, con.stmt);
+		 		break;
+		 	case(2):
+		 		break;
+		 	case(3):
+		 		break;
+		 	case(4):
+		 		break;
+		 	case(5):
+		 	default:
+		 		break browse;
+		 	}
+   	 	}
 	}
 	
 	/**
@@ -824,13 +842,8 @@ public class utrack {
 					
 					// Walk the arraylist
 					for(int i = 0; i < suggestions.size(); i++) {
-						// Get the data from the array
-						// [0] = pid name
-						// [1] = num of visits
-						for(int j = 0; j < 1; j++) {
-							String arr[] = suggestions.get(i);
-							System.out.println(count + "- POI Name: " +arr[0] +" || Number of Times Visited: " +arr[1]);
-						}
+						String arr[] = suggestions.get(i);
+						System.out.println(count + "- POI Name: " +arr[0] +" || Number of Times Visited: " +arr[1]);
 						// New feedback, let's increment count
 						count++;
 					}
